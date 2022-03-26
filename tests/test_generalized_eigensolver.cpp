@@ -91,3 +91,8 @@ TEST(GeneralizedEigensolver, ClearCorrespondences) {
 
   EXPECT_LE(rot_residual, 0.01);
 }
+
+int main(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
