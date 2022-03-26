@@ -15,7 +15,7 @@ Eigen::Matrix4d ComposeG(
     const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_centers_matrix1,
     const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &rcm2_cross_rdm2,
     const cayley_t &cayley) {
-  rotation_t rotation = CayleyToRotationMatrixReduced(cayley);
+  rotation_t rotation = CayleyToRotationMatrixUnscaled(cayley);
 
   Eigen::Matrix<double, 3, 8, Eigen::RowMajor> rot_ray_directions_matrix2 =
       rotation * ray_directions_matrix2;

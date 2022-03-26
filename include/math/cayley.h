@@ -6,7 +6,7 @@
 namespace gefast {
 rotation_t CayleyToRotationMatrix(const cayley_t &cayley);
 
-rotation_t CayleyToRotationMatrixReduced(const cayley_t &cayley);
+rotation_t CayleyToRotationMatrixUnscaled(const cayley_t &cayley);
 
 cayley_t RotationMatrixToCayley(const rotation_t &rotation);
 }  // namespace gefast

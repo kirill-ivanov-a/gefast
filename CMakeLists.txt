@@ -1,39 +1,57 @@
-cmake_minimum_required(VERSION 3.13.0)
-project(gefast LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.15)
+project(gefast LANGUAGES CXX VERSION 0.1)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(LIBRARY_NAME ${PROJECT_NAME})
+set(CMAKE_BUILD_TYPE Release)
 
+option(BUILD_TESTS "Build tests" ON)
+option(ASAN_BUILD "Build with Address Sanitizer" OFF)
+option(PROFILE_BUILD "Build with perftools profiler" OFF)
+option(VERBOSE "Print additional build information" OFF)
+
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+include(${CMAKE_MODULE_PATH}/CompilerFlags.cmake)
+
+if (ASAN_BUILD)
+    add_compile_options("-fsanitize=address")
+    link_libraries("-fsanitize=address")
+endif ()
+
+if (PROFILE_BUILD)
+    link_libraries("-lprofiler")
+endif ()
+
+message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 
 find_package(Eigen3 REQUIRED)
 
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -march=native")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native -ffast-math -fno-unsafe-math-optimizations -funroll-loops -fprefetch-loop-arrays -funswitch-loops")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g3 -DNDEBUG -march=native -ffast-math -fno-unsafe-math-optimizations -funroll-loops -fprefetch-loop-arrays -funswitch-loops")
-
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
 
-set(gefast_HEADER_FILES
+set(LIBRARY_HEADER_FILES
         ${PROJECT_SOURCE_DIR}/include/math/cayley.h
         ${PROJECT_SOURCE_DIR}/include/types.h
         ${PROJECT_SOURCE_DIR}/include/solver/generalized_eigensolver.h
         )
 
-set(gefast_SOURCE_FILES
+set(LIBRARY_SOURCE_FILES
         ${PROJECT_SOURCE_DIR}/src/math/cayley.cpp
         ${PROJECT_SOURCE_DIR}/src/solver/generalized_eigensolver.cpp
         )
 
-add_library(gefast
-        ${gefast_SOURCE_FILES}
-        ${gefast_HEADER_FILES})
+add_library(${LIBRARY_NAME}
+        ${LIBRARY_HEADER_FILES}
+        ${LIBRARY_SOURCE_FILES})
 
-target_include_directories(gefast
+target_include_directories(${LIBRARY_NAME}
         PUBLIC
         ${EIGEN3_INCLUDE_DIR}
         ${PROJECT_SOURCE_DIR}/include
         )
 
-enable_testing()
-add_subdirectory(tests)
+if (BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif ()
