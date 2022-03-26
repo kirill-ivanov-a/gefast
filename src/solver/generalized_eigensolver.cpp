@@ -4,6 +4,7 @@
 #include <Eigen/Eigen>
 
 #include "math/cayley.h"
+#include "util/macros.h"
 
 namespace gefast {
 
@@ -23,6 +24,7 @@ Eigen::Matrix4d ComposeG(
       rotation * rcm2_cross_rdm2;
 
   Eigen::Matrix<double, 4, 8, Eigen::RowMajor> g;
+#ifdef GEFAST_INTRINSICS_AVAILABLE
   for (auto i = 0; i < 2; ++i) {
     __m256d _a_1 = _mm256_load_pd(ray_centers_matrix1.data() + i * 4);
     __m256d _a_2 = _mm256_load_pd(ray_centers_matrix1.data() + 8 + i * 4);
@@ -88,7 +90,16 @@ Eigen::Matrix4d ComposeG(
                     _mm256_sub_pd(_rdm1_dot_rcm1_cross_rot_rdm2,
                                   _rdm1_dot_rot_rcm2_cross_rdm2));
   }
-
+#else
+  for (auto i = 0; i != ray_directions_matrix1.cols(); ++i) {
+    g.block<3, 1>(0, i) =
+        ray_directions_matrix1.col(i).cross(rot_ray_directions_matrix2.col(i));
+    g(3, i) =
+        ray_directions_matrix1.col(i).transpose() *
+        (ray_centers_matrix1.col(i).cross(rot_ray_directions_matrix2.col(i)) -
+         rot_rcm2_cross_rdm2.col(i));
+  }
+#endif
   return g * g.transpose();
 }
 
@@ -344,7 +355,7 @@ void SolveGE(const std::vector<Eigen::Vector3d> &ray_centers1,
     points_center1 += ray_directions_matrix1.col(i);
     points_center2 += ray_directions_matrix2.col(i);
   }
-
+#ifdef GEFAST_INTRINSICS_AVAILABLE
   for (auto i = 0; i < kCorrespondencesNumber / 4; ++i) {
     __m256d _rcm1_1 = _mm256_load_pd(ray_centers_matrix1.data() + i * 4);
     __m256d _rcm1_2 = _mm256_load_pd(ray_centers_matrix1.data() + 8 + i * 4);
@@ -368,6 +379,12 @@ void SolveGE(const std::vector<Eigen::Vector3d> &ray_centers1,
     _mm256_store_pd(rcm2_cross_rdm2.data() + 8 + i * 4, _res2);
     _mm256_store_pd(rcm2_cross_rdm2.data() + 16 + i * 4, _res3);
   }
+#else
+  for (auto i = 0; i < kCorrespondencesNumber; ++i) {
+    rcm2_cross_rdm2.col(i).noalias() =
+        ray_centers_matrix2.col(i).cross(ray_directions_matrix2.col(i));
+  }
+#endif
 
   points_center1 /= kCorrespondencesNumber;
   points_center2 /= kCorrespondencesNumber;
@@ -378,7 +395,6 @@ void SolveGE(const std::vector<Eigen::Vector3d> &ray_centers1,
   Hcross.noalias() =
       (ray_directions_matrix2.colwise() - points_center2) *
       (ray_directions_matrix1.colwise() - points_center1).transpose();
-
 
   // SVD decomposition of matrix Hcross to obtain initial rotation
   Eigen::JacobiSVD<Eigen::Matrix3d> svd(
