@@ -369,16 +369,16 @@ void SolveGE(const std::vector<Eigen::Vector3d> &ray_centers1,
     _mm256_store_pd(rcm2_cross_rdm2.data() + 16 + i * 4, _res3);
   }
 
-  points_center1 = points_center1 / kCorrespondencesNumber;
-  points_center2 = points_center2 / kCorrespondencesNumber;
+  points_center1 /= kCorrespondencesNumber;
+  points_center2 /= kCorrespondencesNumber;
 
   Eigen::Matrix3d Hcross(3, 3);
   Hcross = Eigen::Matrix3d::Zero();
 
-  for (auto i = 0; i < kCorrespondencesNumber; ++i)
-    Hcross.noalias() +=
-        (ray_directions_matrix2.col(i) - points_center2) *
-        (ray_directions_matrix1.col(i) - points_center1).transpose();
+  Hcross.noalias() =
+      (ray_directions_matrix2.colwise() - points_center2) *
+      (ray_directions_matrix1.colwise() - points_center1).transpose();
+
 
   // SVD decomposition of matrix Hcross to obtain initial rotation
   Eigen::JacobiSVD<Eigen::Matrix3d> svd(
