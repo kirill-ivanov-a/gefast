@@ -95,4 +95,3 @@ int main() {
 This project is licensed under MIT License. The license file is located [here](https://github.com/kirill-ivanov-a/gefast/blob/main/LICENSE).
 
 **Note** that some parts of code are derived from [`opengv`](https://github.com/laurentkneip/opengv) library. The license of this project can be found [here](https://github.com/laurentkneip/opengv/blob/master/License.txt)
-
