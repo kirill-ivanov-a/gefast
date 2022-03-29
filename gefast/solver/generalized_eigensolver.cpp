@@ -389,10 +389,7 @@ void SolveGE(const std::vector<Eigen::Vector3d> &ray_centers1,
   points_center1 /= kCorrespondencesNumber;
   points_center2 /= kCorrespondencesNumber;
 
-  Eigen::Matrix3d Hcross(3, 3);
-  Hcross = Eigen::Matrix3d::Zero();
-
-  Hcross.noalias() =
+  Eigen::Matrix3d Hcross =
       (ray_directions_matrix2.colwise() - points_center2) *
       (ray_directions_matrix1.colwise() - points_center1).transpose();
 

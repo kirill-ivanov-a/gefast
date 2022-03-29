@@ -1,5 +1,5 @@
-#ifndef GEFAST_TYPES_H
-#define GEFAST_TYPES_H
+#ifndef GEFAST_TYPES_H_
+#define GEFAST_TYPES_H_
 
 #include <Eigen/Eigen>
 
@@ -21,4 +21,4 @@ struct RelativePose {
 };
 }  // namespace gefast
 
-#endif  // GEFAST_TYPES_H
+#endif  // GEFAST_TYPES_H_
