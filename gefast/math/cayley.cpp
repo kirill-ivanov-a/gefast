@@ -1,4 +1,4 @@
-#include "math/cayley.h"
+#include "cayley.h"
 
 namespace gefast {
 

@@ -1,7 +1,7 @@
 #ifndef GEFAST_MATH_CAYLEY_H_
 #define GEFAST_MATH_CAYLEY_H_
 
-#include "types.h"
+#include "gefast/types.h"
 
 namespace gefast {
 rotation_t CayleyToRotationMatrix(const cayley_t &cayley);

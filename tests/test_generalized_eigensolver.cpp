@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "solver/generalized_eigensolver.h"
+#include "gefast/solver/generalized_eigensolver.h"
 
 gefast::rotation_t GenerateRotation(double alpha, double beta, double gamma) {
   Eigen::Matrix3d rotation =

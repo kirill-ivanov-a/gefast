@@ -1,7 +1,3 @@
-//
-// Created by jeten on 26.03.2022.
-//
-
 #ifndef GEFAST_MACROS_H
 #define GEFAST_MACROS_H
 

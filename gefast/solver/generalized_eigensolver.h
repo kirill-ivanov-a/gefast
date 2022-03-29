@@ -1,6 +1,7 @@
 #ifndef GEFAST_SOLVER_GENERALIZED_EIGENSOLVER_H_
 #define GEFAST_SOLVER_GENERALIZED_EIGENSOLVER_H_
-#include "types.h"
+
+#include "gefast/types.h"
 
 #include <Eigen/Eigen>
 

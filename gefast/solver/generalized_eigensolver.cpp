@@ -1,10 +1,10 @@
-#include "solver/generalized_eigensolver.h"
+#include "generalized_eigensolver.h"
 
 #include <immintrin.h>
 #include <Eigen/Eigen>
 
-#include "math/cayley.h"
-#include "util/macros.h"
+#include "gefast/math/cayley.h"
+#include "gefast/util/macros.h"
 
 namespace gefast {
 
