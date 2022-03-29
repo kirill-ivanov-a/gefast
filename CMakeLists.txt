@@ -16,7 +16,7 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif ()
 
-option(BUILD_TESTS "Build tests" ON)
+option(BUILD_TESTS "Build tests" OFF)
 option(ASAN_BUILD "Build with Address Sanitizer" OFF)
 option(PROFILE_BUILD "Build with perftools profiler" OFF)
 
