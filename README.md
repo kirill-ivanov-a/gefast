@@ -1,4 +1,6 @@
 # GEFast
+[![tests](https://github.com/kirill-ivanov-a/gefast/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/kirill-ivanov-a/gefast/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 The library provides fast and lightweight implementation of an 8-point generalized eigensolver for relative pose estimating of a calibrated camera based on [`opengv`](https://github.com/laurentkneip/opengv) implementation. The key features of the library are:
 - support AVX2 instructions;
