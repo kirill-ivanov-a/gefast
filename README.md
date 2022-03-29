@@ -28,7 +28,7 @@ cd gefast
 mkdir build && cd build
 cmake ..
 cmake --build . -- -j6
-make install
+sudo make install
 ```
 
 ## Use in your CMake project
@@ -37,6 +37,7 @@ Here is an example of using the library in your project:
 ```CMake
 project(YourProject)
 
+find_package(Eigen3 REQUIRED)
 find_package(gefast REQUIRED)
 
 add_executable(main main.cpp)
