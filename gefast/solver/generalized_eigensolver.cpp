@@ -158,7 +158,7 @@ eigenvalues_t GetEigenvalues(
   double temp1 = -B / 4.0 - 0.5 * w;
   double temp2 = 0.5 * sqrt(-3.0 * alpha - 2.0 * y + 2.0 * beta / w);
 
-  Eigen::Vector2d roots;
+  eigenvalues_t roots;
   roots[0] = temp1 + temp2;
   roots[1] = temp1 - temp2;
   return roots;
@@ -169,15 +169,15 @@ double GetCost(
     const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_directions_matrix2,
     const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_centers_matrix1,
     const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &rcm2_cross_rdm2,
-    const cayley_t &cayley, int step) {
+    const cayley_t &cayley, bool use_smallest_ev) {
   Eigen::Vector2d roots =
       GetEigenvalues(ray_directions_matrix1, ray_directions_matrix2,
                      ray_centers_matrix1, rcm2_cross_rdm2, cayley);
 
-  if (step == 0) return roots[0];
-  if (step == 1) return roots[1];
-
-  return 0;
+  if (use_smallest_ev)
+    return roots[1];
+  else
+    return roots[0];
 }
 
 jacobian_t GetJacobian(
@@ -185,16 +185,16 @@ jacobian_t GetJacobian(
     const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_directions_matrix2,
     const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_centers_matrix1,
     const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &rcm2_cross_rdm2,
-    const cayley_t &cayley, double current_eigenvalue, int step) {
+    const cayley_t &cayley, double current_eigenvalue, bool use_smallest_ev) {
   jacobian_t jacobian;
   double eps = 0.00000001;
 
   for (int j = 0; j < 3; j++) {
     cayley_t cayley_j = cayley;
     cayley_j(j) += eps;
-    double cost_j =
-        GetCost(ray_directions_matrix1, ray_directions_matrix2,
-                ray_centers_matrix1, rcm2_cross_rdm2, cayley_j, step);
+    double cost_j = GetCost(ray_directions_matrix1, ray_directions_matrix2,
+                            ray_centers_matrix1, rcm2_cross_rdm2, cayley_j,
+                            use_smallest_ev);
     jacobian(j) =
         cost_j - current_eigenvalue;  // division by eps can be ommited
   }
@@ -229,11 +229,11 @@ void FindModel(
 
     double smallestEV =
         GetCost(ray_directions_matrix1, ray_directions_matrix2,
-                ray_centers_matrix1, rcm2_cross_rdm2, cayley, 1);
+                ray_centers_matrix1, rcm2_cross_rdm2, cayley, true);
 
     jacobian_t jacobian = GetJacobian(
         ray_directions_matrix1, ray_directions_matrix2, ray_centers_matrix1,
-        rcm2_cross_rdm2, cayley, smallestEV, 1);
+        rcm2_cross_rdm2, cayley, smallestEV, true);
     jacobian.normalize();
     Eigen::Matrix3d inverse_hessian = Eigen::Matrix3d::Identity();
 
@@ -251,7 +251,7 @@ void FindModel(
 
       double nextEV =
           GetCost(ray_directions_matrix1, ray_directions_matrix2,
-                  ray_centers_matrix1, rcm2_cross_rdm2, next_cayley, 1);
+                  ray_centers_matrix1, rcm2_cross_rdm2, next_cayley, true);
 
       if (iterations == 0 || !kDisableIncrements) {
         while (nextEV < smallestEV) {
@@ -261,7 +261,7 @@ void FindModel(
           next_cayley.noalias() = cayley + lambda * searchDirection;
           nextEV =
               GetCost(ray_directions_matrix1, ray_directions_matrix2,
-                      ray_centers_matrix1, rcm2_cross_rdm2, next_cayley, 1);
+                      ray_centers_matrix1, rcm2_cross_rdm2, next_cayley, true);
         }
       }
 
@@ -269,13 +269,14 @@ void FindModel(
         lambda /= lambda_modifier;
         if (lambda < kMinLambda) break;
         next_cayley = cayley + lambda * searchDirection;
-        nextEV = GetCost(ray_directions_matrix1, ray_directions_matrix2,
-                         ray_centers_matrix1, rcm2_cross_rdm2, next_cayley, 1);
+        nextEV =
+            GetCost(ray_directions_matrix1, ray_directions_matrix2,
+                    ray_centers_matrix1, rcm2_cross_rdm2, next_cayley, true);
       }
 
       jacobian_t next_jacobian = GetJacobian(
           ray_directions_matrix1, ray_directions_matrix2, ray_centers_matrix1,
-          rcm2_cross_rdm2, next_cayley, nextEV, 1);
+          rcm2_cross_rdm2, next_cayley, nextEV, true);
       next_jacobian.normalize();
 
       Eigen::Vector3d s = lambda * searchDirection;
@@ -299,7 +300,7 @@ void FindModel(
     if (cayley.norm() < 0.01) {
       // we are close to the origin, test the EV 2
       double ev2 = GetCost(ray_directions_matrix1, ray_directions_matrix2,
-                           ray_centers_matrix1, rcm2_cross_rdm2, cayley, 0);
+                           ray_centers_matrix1, rcm2_cross_rdm2, cayley, false);
       if (ev2 > 0.001)
         ++random_trials;
       else
