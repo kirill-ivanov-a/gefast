@@ -10,18 +10,16 @@ namespace gefast {
 
 namespace {
 
-Eigen::Matrix4d ComposeG(
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_directions_matrix1,
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_directions_matrix2,
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_centers_matrix1,
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &rcm2_cross_rdm2,
-    const cayley_t &cayley) {
+Eigen::Matrix4d ComposeG(const Matrix38dRowMajor &ray_directions_matrix1,
+                         const Matrix38dRowMajor &ray_directions_matrix2,
+                         const Matrix38dRowMajor &ray_centers_matrix1,
+                         const Matrix38dRowMajor &rcm2_cross_rdm2,
+                         const cayley_t &cayley) {
   rotation_t rotation = CayleyToRotationMatrixUnscaled(cayley);
 
-  Eigen::Matrix<double, 3, 8, Eigen::RowMajor> rot_ray_directions_matrix2 =
+  Matrix38dRowMajor rot_ray_directions_matrix2 =
       rotation * ray_directions_matrix2;
-  Eigen::Matrix<double, 3, 8, Eigen::RowMajor> rot_rcm2_cross_rdm2 =
-      rotation * rcm2_cross_rdm2;
+  Matrix38dRowMajor rot_rcm2_cross_rdm2 = rotation * rcm2_cross_rdm2;
 
   Eigen::Matrix<double, 4, 8, Eigen::RowMajor> g;
 #ifdef GEFAST_INTRINSICS_AVAILABLE
@@ -103,12 +101,11 @@ Eigen::Matrix4d ComposeG(
   return g * g.transpose();
 }
 
-eigenvalues_t GetEigenvalues(
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_directions_matrix1,
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_directions_matrix2,
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_centers_matrix1,
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &rcm2_cross_rdm2,
-    const cayley_t &cayley) {
+eigenvalues_t GetEigenvalues(const Matrix38dRowMajor &ray_directions_matrix1,
+                             const Matrix38dRowMajor &ray_directions_matrix2,
+                             const Matrix38dRowMajor &ray_centers_matrix1,
+                             const Matrix38dRowMajor &rcm2_cross_rdm2,
+                             const cayley_t &cayley) {
   Eigen::Matrix4d G = ComposeG(ray_directions_matrix1, ray_directions_matrix2,
                                ray_centers_matrix1, rcm2_cross_rdm2, cayley);
 
@@ -164,34 +161,31 @@ eigenvalues_t GetEigenvalues(
   return roots;
 }
 
-double GetCost(
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_directions_matrix1,
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_directions_matrix2,
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_centers_matrix1,
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &rcm2_cross_rdm2,
-    const cayley_t &cayley, bool use_smallest_ev) {
+double GetCost(const Matrix38dRowMajor &ray_directions_matrix1,
+               const Matrix38dRowMajor &ray_directions_matrix2,
+               const Matrix38dRowMajor &ray_centers_matrix1,
+               const Matrix38dRowMajor &rcm2_cross_rdm2, const cayley_t &cayley,
+               bool use_smallest_ev) {
   Eigen::Vector2d roots =
       GetEigenvalues(ray_directions_matrix1, ray_directions_matrix2,
                      ray_centers_matrix1, rcm2_cross_rdm2, cayley);
 
-  if (use_smallest_ev)
-    return roots[1];
-  else
-    return roots[0];
+  if (use_smallest_ev) return roots[1];
+  return roots[0];
 }
 
-jacobian_t GetJacobian(
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_directions_matrix1,
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_directions_matrix2,
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_centers_matrix1,
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &rcm2_cross_rdm2,
-    const cayley_t &cayley, double current_eigenvalue, bool use_smallest_ev) {
+jacobian_t GetJacobian(const Matrix38dRowMajor &ray_directions_matrix1,
+                       const Matrix38dRowMajor &ray_directions_matrix2,
+                       const Matrix38dRowMajor &ray_centers_matrix1,
+                       const Matrix38dRowMajor &rcm2_cross_rdm2,
+                       const cayley_t &cayley, double current_eigenvalue,
+                       bool use_smallest_ev) {
   jacobian_t jacobian;
-  double eps = 0.00000001;
+  const double kEpsilon = 0.00000001;
 
   for (int j = 0; j < 3; j++) {
     cayley_t cayley_j = cayley;
-    cayley_j(j) += eps;
+    cayley_j(j) += kEpsilon;
     double cost_j = GetCost(ray_directions_matrix1, ray_directions_matrix2,
                             ray_centers_matrix1, rcm2_cross_rdm2, cayley_j,
                             use_smallest_ev);
@@ -201,12 +195,11 @@ jacobian_t GetJacobian(
   return jacobian;
 }
 
-void FindModel(
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_directions_matrix1,
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_directions_matrix2,
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &ray_centers_matrix1,
-    const Eigen::Matrix<double, 3, 8, Eigen::RowMajor> &rcm2_cross_rdm2,
-    const cayley_t &starting_point, RelativePose &model) {
+void FindModel(const Matrix38dRowMajor &ray_directions_matrix1,
+               const Matrix38dRowMajor &ray_directions_matrix2,
+               const Matrix38dRowMajor &ray_centers_matrix1,
+               const Matrix38dRowMajor &rcm2_cross_rdm2,
+               const cayley_t &starting_point, RelativePose &model) {
   double lambda = 0.017;
   double lambda_modifier = 2.0;
   const double kMaxLambda = 0.07;
@@ -325,37 +318,33 @@ void FindModel(
 
 }  // namespace
 
-void SolveGE(const std::vector<Eigen::Vector3d> &ray_centers1,
-             const std::vector<Eigen::Vector3d> &ray_directions1,
-             const std::vector<Eigen::Vector3d> &ray_centers2,
-             const std::vector<Eigen::Vector3d> &ray_directions2,
+void SolveGE(std::vector<Eigen::Vector3d> &ray_centers1,
+             std::vector<Eigen::Vector3d> &ray_directions1,
+             std::vector<Eigen::Vector3d> &ray_centers2,
+             std::vector<Eigen::Vector3d> &ray_directions2,
              RelativePose &output) {
   const int kCorrespondencesNumber = static_cast<int>(ray_centers1.size());
   // the solver only works with 8 correspondences
+  // TODO: make it clean
   assert(kCorrespondencesNumber == 8);
   assert(ray_centers2.size() == kCorrespondencesNumber);
   assert(ray_directions1.size() == kCorrespondencesNumber);
   assert(ray_directions2.size() == kCorrespondencesNumber);
 
-  Eigen::Vector3d points_center1 = Eigen::Vector3d::Zero();
-  Eigen::Vector3d points_center2 = Eigen::Vector3d::Zero();
+  // TODO: alignment?
+  Matrix38dRowMajor ray_directions_matrix1 = Eigen::Map<Matrix38dColMajor>(
+      reinterpret_cast<double *>(ray_directions1.data()));
+  Matrix38dRowMajor ray_directions_matrix2 = Eigen::Map<Matrix38dColMajor>(
+      reinterpret_cast<double *>(ray_directions2.data()));
+  Matrix38dRowMajor ray_centers_matrix1 = Eigen::Map<Matrix38dColMajor>(
+      reinterpret_cast<double *>(ray_centers1.data()));
+  Matrix38dRowMajor ray_centers_matrix2 = Eigen::Map<Matrix38dColMajor>(
+      reinterpret_cast<double *>(ray_centers2.data()));
+  Matrix38dRowMajor rcm2_cross_rdm2;
 
-  Eigen::Matrix<double, 3, 8, Eigen::RowMajor> ray_directions_matrix1;
-  Eigen::Matrix<double, 3, 8, Eigen::RowMajor> ray_directions_matrix2;
-  Eigen::Matrix<double, 3, 8, Eigen::RowMajor> ray_centers_matrix1;
-  Eigen::Matrix<double, 3, 8, Eigen::RowMajor> ray_centers_matrix2;
-  Eigen::Matrix<double, 3, 8, Eigen::RowMajor> rcm2_cross_rdm2;
+  Eigen::Vector3d points_center1 = ray_directions_matrix1.rowwise().sum();
+  Eigen::Vector3d points_center2 = ray_directions_matrix2.rowwise().sum();
 
-  // TODO: direct init from a list?
-
-  for (auto i = 0; i < kCorrespondencesNumber; ++i) {
-    ray_directions_matrix1.col(i) = ray_directions1[i];
-    ray_directions_matrix2.col(i) = ray_directions2[i];
-    ray_centers_matrix1.col(i) = ray_centers1[i];
-    ray_centers_matrix2.col(i) = ray_centers2[i];
-    points_center1 += ray_directions_matrix1.col(i);
-    points_center2 += ray_directions_matrix2.col(i);
-  }
 #ifdef GEFAST_INTRINSICS_AVAILABLE
   for (auto i = 0; i < kCorrespondencesNumber / 4; ++i) {
     __m256d _rcm1_1 = _mm256_load_pd(ray_centers_matrix1.data() + i * 4);

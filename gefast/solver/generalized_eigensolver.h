@@ -6,10 +6,10 @@
 #include <Eigen/Eigen>
 
 namespace gefast {
-void SolveGE(const std::vector<Eigen::Vector3d> &ray_centers1,
-             const std::vector<Eigen::Vector3d> &ray_directions1,
-             const std::vector<Eigen::Vector3d> &ray_centers2,
-             const std::vector<Eigen::Vector3d> &ray_directions2,
+void SolveGE(std::vector<Eigen::Vector3d> &ray_centers1,
+             std::vector<Eigen::Vector3d> &ray_directions1,
+             std::vector<Eigen::Vector3d> &ray_centers2,
+             std::vector<Eigen::Vector3d> &ray_directions2,
              RelativePose &output);
 }
 
