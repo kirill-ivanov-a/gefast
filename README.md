@@ -80,7 +80,7 @@ int main() {
   std::vector<Eigen::Vector3d> ray_centers1;
   std::vector<Eigen::Vector3d> ray_centers2;
   
-  // initialization of ray directions and rat centers 
+  // initialization of ray directions and ray centers 
   // ...
   
   gefast::RelativePose output;
