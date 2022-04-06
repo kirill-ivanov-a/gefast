@@ -347,23 +347,23 @@ void SolveGE(std::vector<Eigen::Vector3d> &ray_centers1,
 
 #ifdef GEFAST_INTRINSICS_AVAILABLE
   for (auto i = 0; i < kCorrespondencesNumber / 4; ++i) {
-    __m256d _rcm1_1 = _mm256_load_pd(ray_centers_matrix1.data() + i * 4);
-    __m256d _rcm1_2 = _mm256_load_pd(ray_centers_matrix1.data() + 8 + i * 4);
-    __m256d _rcm1_3 = _mm256_load_pd(ray_centers_matrix1.data() + 16 + i * 4);
+    __m256d _rcm2_1 = _mm256_load_pd(ray_centers_matrix2.data() + i * 4);
+    __m256d _rcm2_2 = _mm256_load_pd(ray_centers_matrix2.data() + 8 + i * 4);
+    __m256d _rcm2_3 = _mm256_load_pd(ray_centers_matrix2.data() + 16 + i * 4);
 
     __m256d _rdm2_1 = _mm256_load_pd(ray_directions_matrix2.data() + i * 4);
     __m256d _rdm2_2 = _mm256_load_pd(ray_directions_matrix2.data() + 8 + i * 4);
     __m256d _rdm2_3 =
         _mm256_load_pd(ray_directions_matrix2.data() + 16 + i * 4);
 
-    __m256d _res1 = _mm256_mul_pd(_rcm1_3, _rdm2_2);
-    _res1 = _mm256_fmsub_pd(_rcm1_2, _rdm2_3, _res1);
+    __m256d _res1 = _mm256_mul_pd(_rcm2_3, _rdm2_2);
+    _res1 = _mm256_fmsub_pd(_rcm2_2, _rdm2_3, _res1);
 
-    __m256d _res2 = _mm256_mul_pd(_rcm1_1, _rdm2_3);
-    _res2 = _mm256_fmsub_pd(_rcm1_3, _rdm2_1, _res2);
+    __m256d _res2 = _mm256_mul_pd(_rcm2_1, _rdm2_3);
+    _res2 = _mm256_fmsub_pd(_rcm2_3, _rdm2_1, _res2);
 
-    __m256d _res3 = _mm256_mul_pd(_rcm1_2, _rdm2_1);
-    _res3 = _mm256_fmsub_pd(_rcm1_1, _rdm2_2, _res3);
+    __m256d _res3 = _mm256_mul_pd(_rcm2_2, _rdm2_1);
+    _res3 = _mm256_fmsub_pd(_rcm2_1, _rdm2_2, _res3);
 
     _mm256_store_pd(rcm2_cross_rdm2.data() + i * 4, _res1);
     _mm256_store_pd(rcm2_cross_rdm2.data() + 8 + i * 4, _res2);
