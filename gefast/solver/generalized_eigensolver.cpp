@@ -110,26 +110,36 @@ eigenvalues_t GetEigenvalues(const Matrix38dRowMajor &ray_directions_matrix1,
                                ray_centers_matrix1, rcm2_cross_rdm2, cayley);
 
   // now compute the roots in closed-form
-  double G01_2 = G(0, 1) * G(0, 1);
-  double G02_2 = G(0, 2) * G(0, 2);
-  double G03_2 = G(0, 3) * G(0, 3);
-  double G12_2 = G(1, 2) * G(1, 2);
-  double G13_2 = G(1, 3) * G(1, 3);
-  double G23_2 = G(2, 3) * G(2, 3);
+  const auto G33 = G(3, 3);
+  const auto G22 = G(2, 2);
+  const auto G11 = G(1, 1);
+  const auto G00 = G(0, 0);
+  const auto G12 = G(1, 2);
+  const auto G13 = G(1, 3);
+  const auto G23 = G(2, 3);
+  const auto G01 = G(0, 1);
+  const auto G02 = G(0, 2);
+  const auto G03 = G(0, 3);
+  const auto G11_plus_G22 = G11 + G22;
+  const auto G22_plus_G33 = G22 + G33;
+  const auto G00_plus_G11 = G00 + G11;
+  const auto G01_2 = G01 * G01;
+  const auto G02_2 = G02 * G02;
+  const auto G03_2 = G03 * G03;
+  const auto G12_2 = G12 * G12;
+  const auto G13_2 = G13 * G13;
+  const auto G23_2 = G23 * G23;
+  const auto G12_2_plus_G13_2_plus_G23_3 = G12_2 + G13_2 + G23_2;
 
-  const double B = -G.trace();
-  const double C = -G23_2 + G(3, 3) * (G(2, 2) + G(1, 1) + G(0, 0)) - G13_2 -
-                   G12_2 + G(1, 1) * G(2, 2) - G03_2 - G02_2 - G01_2 +
-                   G(0, 0) * (G(2, 2) + G(1, 1));
+  const double B = -(G00_plus_G11 + G22_plus_G33);
+  const double C = -G12_2_plus_G13_2_plus_G23_3 + G33 * (G00_plus_G11 + G22) +
+                   G11 * G22 - (G03_2 + G02_2 + G01_2) + G00 * (G11_plus_G22);
   const double D =
-      G13_2 * G(2, 2) - 2.0 * G(1, 2) * G(1, 3) * G(2, 3) -
-      2.0 * G(0, 1) * G(0, 2) * G(1, 2) - 2.0 * G(0, 2) * G(0, 3) * G(2, 3) -
-      2.0 * G(0, 1) * G(0, 3) * G(1, 3) + G(1, 1) * G23_2 -
-      G(1, 1) * G(2, 2) * G(3, 3) + G03_2 * G(2, 2) + G03_2 * G(1, 1) +
-      G02_2 * G(3, 3) + G02_2 * G(1, 1) + G01_2 * G(3, 3) + G01_2 * G(2, 2) +
-      G(0, 0) * G23_2 - G(0, 0) * G(2, 2) * G(3, 3) + G(0, 0) * G13_2 +
-      G(0, 0) * G12_2 - G(0, 0) * G(1, 1) * G(3, 3) -
-      G(0, 0) * G(1, 1) * G(2, 2) + G12_2 * G(3, 3);
+      G13_2 * G22 -
+      2.0 * (G12 * (G13 * G23 + G01 * G02) + G03 * (G02 * G23 + G01 * G13)) +
+      G11 * G23_2 - (G22 * G33 * (G00_plus_G11) + G00 * G11 * (G22_plus_G33)) +
+      G03_2 * G11_plus_G22 + G02_2 * (G33 + G11) + G01_2 * G22_plus_G33 +
+      G00 * (G12_2_plus_G13_2_plus_G23_3) + G12_2 * G33;
 
   const double E = G.determinant();
 
