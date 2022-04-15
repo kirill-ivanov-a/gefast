@@ -193,12 +193,12 @@ jacobian_t GetJacobian(const Matrix38dRowMajor &ray_directions_matrix1,
   jacobian_t jacobian;
   const double kEpsilon = 0.00000001;
 
-  for (int j = 0; j < 3; j++) {
+  for (auto j = 0; j != 3; ++j) {
     cayley_t cayley_j = cayley;
     cayley_j(j) += kEpsilon;
-    double cost_j = GetCost(ray_directions_matrix1, ray_directions_matrix2,
-                            ray_centers_matrix1, rcm2_cross_rdm2, cayley_j,
-                            use_smallest_ev);
+    auto cost_j = GetCost(ray_directions_matrix1, ray_directions_matrix2,
+                          ray_centers_matrix1, rcm2_cross_rdm2, cayley_j,
+                          use_smallest_ev);
     jacobian(j) =
         cost_j - current_eigenvalue;  // division by eps can be ommited
   }

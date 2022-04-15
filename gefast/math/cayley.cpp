@@ -3,41 +3,33 @@
 namespace gefast {
 
 rotation_t CayleyToRotationMatrix(const cayley_t &cayley) {
-  rotation_t rotation;
   double scale = 1 + cayley.squaredNorm();
-
-  rotation(0, 0) =
-      1 + pow(cayley[0], 2) - pow(cayley[1], 2) - pow(cayley[2], 2);
-  rotation(0, 1) = 2 * (cayley[0] * cayley[1] - cayley[2]);
-  rotation(0, 2) = 2 * (cayley[0] * cayley[2] + cayley[1]);
-  rotation(1, 0) = 2 * (cayley[0] * cayley[1] + cayley[2]);
-  rotation(1, 1) =
-      1 - cayley[0] * cayley[0] + cayley[1] * cayley[1] - cayley[2] * cayley[2];
-  rotation(1, 2) = 2 * (cayley[1] * cayley[2] - cayley[0]);
-  rotation(2, 0) = 2 * (cayley[0] * cayley[2] - cayley[1]);
-  rotation(2, 1) = 2 * (cayley[1] * cayley[2] + cayley[0]);
-  rotation(2, 2) =
-      1 - cayley[0] * cayley[0] - cayley[1] * cayley[1] + cayley[2] * cayley[2];
-
-  rotation /= scale;
-  return rotation;
+  return CayleyToRotationMatrixUnscaled(cayley) / scale;
 }
 
 rotation_t CayleyToRotationMatrixUnscaled(const cayley_t &cayley) {
   rotation_t rotation;
 
-  rotation(0, 0) =
-      1 + pow(cayley[0], 2) - pow(cayley[1], 2) - pow(cayley[2], 2);
-  rotation(0, 1) = 2 * (cayley[0] * cayley[1] - cayley[2]);
-  rotation(0, 2) = 2 * (cayley[0] * cayley[2] + cayley[1]);
-  rotation(1, 0) = 2 * (cayley[0] * cayley[1] + cayley[2]);
-  rotation(1, 1) =
-      1 - cayley[0] * cayley[0] + cayley[1] * cayley[1] - cayley[2] * cayley[2];
-  rotation(1, 2) = 2 * (cayley[1] * cayley[2] - cayley[0]);
-  rotation(2, 0) = 2 * (cayley[0] * cayley[2] - cayley[1]);
-  rotation(2, 1) = 2 * (cayley[1] * cayley[2] + cayley[0]);
-  rotation(2, 2) =
-      1 - cayley[0] * cayley[0] - cayley[1] * cayley[1] + cayley[2] * cayley[2];
+  auto cayley0 = cayley[0];
+  auto cayley1 = cayley[1];
+  auto cayley2 = cayley[2];
+
+  auto cayley0_pw2 = cayley0 * cayley0;
+  auto cayley1_pw2 = cayley1 * cayley1;
+  auto cayley2_pw2 = cayley2 * cayley2;
+  auto cayley0_mul_cayley1 = cayley0 * cayley1;
+  auto cayley0_mul_cayley2 = cayley0 * cayley2;
+  auto cayley1_mul_cayley2 = cayley1 * cayley2;
+
+  rotation(0, 0) = 1 + pow(cayley0, 2) - pow(cayley1, 2) - pow(cayley2, 2);
+  rotation(0, 1) = 2 * (cayley0_mul_cayley1 - cayley2);
+  rotation(0, 2) = 2 * (cayley0_mul_cayley2 + cayley1);
+  rotation(1, 0) = 2 * (cayley0_mul_cayley1 + cayley2);
+  rotation(1, 1) = 1 - cayley0_pw2 + cayley1_pw2 - cayley2_pw2;
+  rotation(1, 2) = 2 * (cayley1_mul_cayley2 - cayley0);
+  rotation(2, 0) = 2 * (cayley0_mul_cayley2 - cayley1);
+  rotation(2, 1) = 2 * (cayley1_mul_cayley2 + cayley0);
+  rotation(2, 2) = 1 - cayley0_pw2 - cayley1_pw2 + cayley2_pw2;
 
   return rotation;
 }
