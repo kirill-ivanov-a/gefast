@@ -1,20 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "gefast/solver/generalized_eigensolver.h"
-
-gefast::rotation_t GenerateRotation(double alpha, double beta, double gamma) {
-  Eigen::Matrix3d rotation =
-      (Eigen::AngleAxisd(gamma, Eigen::Vector3d::UnitZ()) *
-       Eigen::AngleAxisd(beta, Eigen::Vector3d::UnitY()) *
-       Eigen::AngleAxisd(alpha, Eigen::Vector3d::UnitZ()))
-          .toRotationMatrix();
-  return rotation;
-}
-
-gefast::rotation_t GenerateRandomRotation(double maxAngle) {
-  Eigen::Vector3d angles = maxAngle * Eigen::Vector3d::Random();
-  return GenerateRotation(angles[0], angles[1], angles[2]);
-}
+#include "gefast/math/rotation.h"
 
 // Demonstrate some basic assertions.
 TEST(GeneralizedEigensolver, ClearCorrespondences) {
@@ -25,15 +12,16 @@ TEST(GeneralizedEigensolver, ClearCorrespondences) {
   gefast::rotation_t rotation1 = gefast::rotation_t::Identity();
 
   gefast::translation_t position2 = 2 * gefast::translation_t::Random();
-  gefast::rotation_t rotation2 = GenerateRandomRotation(0.5);
+  gefast::rotation_t rotation2 = gefast::GenerateRandomRotation(0.5);
 
   std::vector<gefast::translation_t> cameras_translations = {
       Eigen::Vector3d(0, -1, 0), Eigen::Vector3d(-1, 0, 0),
       Eigen::Vector3d(1, 0, 0), Eigen::Vector3d(0, 1, 0)};
 
   std::vector<gefast::rotation_t> cameras_rotations = {
-      GenerateRotation(M_PI / 2, 0, 0), GenerateRotation(0, 0, 0),
-      GenerateRotation(M_PI, 0, 0), GenerateRotation(3 * M_PI / 2, 0, 0)};
+      gefast::GenerateRotation(M_PI / 2, 0, 0),
+      gefast::GenerateRotation(0, 0, 0), gefast::GenerateRotation(M_PI, 0, 0),
+      gefast::GenerateRotation(3 * M_PI / 2, 0, 0)};
 
   std::vector<Eigen::Vector3d> bearing_vectors1;
   std::vector<Eigen::Vector3d> bearing_vectors2;

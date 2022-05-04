@@ -334,14 +334,15 @@ void SolveGE(std::vector<Eigen::Vector3d> &ray_centers1,
              std::vector<Eigen::Vector3d> &ray_directions2,
              RelativePose &output) {
   const int kCorrespondencesNumber = static_cast<int>(ray_centers1.size());
-  // the solver only works with 8 correspondences
-  // TODO: make it clean
-  assert(kCorrespondencesNumber == 8);
-  assert(ray_centers2.size() == kCorrespondencesNumber);
-  assert(ray_directions1.size() == kCorrespondencesNumber);
-  assert(ray_directions2.size() == kCorrespondencesNumber);
+  GEFAST_ASSERT(kCorrespondencesNumber == 8,
+                "the solver only works with 8 correspondences");
+  GEFAST_ASSERT(ray_centers2.size() == kCorrespondencesNumber,
+                "the number of second camera ray centers must be 8");
+  GEFAST_ASSERT(ray_directions1.size() == kCorrespondencesNumber,
+                "the number of first camera ray directions must be 8");
+  GEFAST_ASSERT(ray_directions2.size() == kCorrespondencesNumber,
+                "the number of second camera ray directions must be 8");
 
-  // TODO: alignment?
   Matrix38dRowMajor ray_directions_matrix1 = Eigen::Map<Matrix38dColMajor>(
       reinterpret_cast<double *>(ray_directions1.data()));
   Matrix38dRowMajor ray_directions_matrix2 = Eigen::Map<Matrix38dColMajor>(
